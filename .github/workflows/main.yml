@@ -1,0 +1,21 @@
+name: Daily Data Grab
+on:
+  schedule:
+    - cron: '0 0 * * *'  # This means "Midnight every night"
+  workflow_dispatch:      # This adds a "Run Now" button for you
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Fetch BTC Data
+        run: |
+          pip install pandas
+          python -c "import pandas as pd; df = pd.read_csv('https://raw.githubusercontent.com/coinmetrics/data/master/csv/btc.csv'); df.to_csv('btc_backup.csv', index=False)"
+      - name: Save to my Folder
+        run: |
+          git config --global user.name 'Data-Bot'
+          git config --global user.email 'bot@bot.com'
+          git add btc_backup.csv
+          git commit -m "Updated Bitcoin Data" || exit 0
+          git push
